@@ -1,0 +1,31 @@
+{
+  "96175": {
+    "description": "Low rotation",
+    "time": [45, 50]
+  },
+  "96375": {
+    "description": "Typical high-power discharge",
+    "time": [45, 50]
+  },
+  "94442": {
+    "description": "Extreme rotation",
+    "time": [45, 50]
+  },
+  "90279": {
+    "description": "Neon seeded",
+    "time": [45, 50],
+    "cameras": ["v"],
+    "n_knots": 7,
+    "ignore_channels": {
+      "hrts_te": [62],
+      "hrts_ne": [62],
+      "sxr_t": [],
+      "sxr_v": [],
+      "sxr_h": []
+    }
+  },
+  "97006": {
+    "description": "He-3 and accumulation",
+    "time": [45, 50]
+  }
+}
