@@ -4,12 +4,13 @@ Run with specific data source (e.g. JET JPF/PPF data)
 """
 import getpass
 import json
-import os.path
-from typing import Tuple, Union
+from pathlib import Path
+from typing import Tuple
+from typing import Union
 
+from matplotlib import pylab as plt
 import numpy as np
 from xarray.core.dataarray import DataArray
-from matplotlib import pylab as plt
 
 from indica import readers
 from indica.equilibrium import Equilibrium
@@ -62,8 +63,9 @@ class JetTestAnalysis(BaseTestAnalysis):
         super().__init__(**kwargs)
         self.pulse = pulse
         self.time = time
-        readers.abstractreader.CACHE_DIR = os.path.relpath(
-            "test_cache", os.path.expanduser("~")
+        # readers.abstractreader.CACHE_DIR = os.path.abspath("test_cache")
+        readers.abstractreader.CACHE_DIR = (
+            f"{str(Path(__file__).absolute().parent)}/test_cache"
         )
         self.reader = readers.PPFReader(
             pulse=self.pulse,
@@ -190,14 +192,14 @@ class TestNeonSeeded(JetTestAnalysis):
     pass
 
 
-if __name__ == "__main__":
-    #  Testing statements
-    with open("test_cases.json", "r") as f:
+def test_JPN_90279():
+    pulse = 90279
+    with open(f"{str(Path(__file__).absolute().parent)}/test_cases.json", "r") as f:
         test_cases = json.load(f)
-    test_pulse = 90279  # Change for testing
-    JetTestAnalysis(
-        pulse=test_pulse,
+    o = JetTestAnalysis(
+        pulse=pulse,
         time=test_cases.get("time", (45.0, 50.0)),
         cameras=test_cases.get("cameras", ["v"]),
         n_knots=test_cases.get("n_knots", 6),
     )
+    assert o is not None
