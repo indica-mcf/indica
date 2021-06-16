@@ -10,6 +10,7 @@ from typing import Union
 
 from matplotlib import pylab as plt
 import numpy as np
+import pytest
 from xarray.core.dataarray import DataArray
 
 from indica import readers
@@ -63,7 +64,6 @@ class JetTestAnalysis(BaseTestAnalysis):
         super().__init__(**kwargs)
         self.pulse = pulse
         self.time = time
-        # readers.abstractreader.CACHE_DIR = os.path.abspath("test_cache")
         readers.abstractreader.CACHE_DIR = (
             f"{str(Path(__file__).absolute().parent)}/test_cache"
         )
@@ -192,6 +192,10 @@ class TestNeonSeeded(JetTestAnalysis):
     pass
 
 
+@pytest.mark.skip(
+    "Currently unable to run as CI test, "
+    "requires JET PPF server connection and credentials"
+)
 def test_JPN_90279():
     pulse = 90279
     with open(f"{str(Path(__file__).absolute().parent)}/test_cases.json", "r") as f:
@@ -202,4 +206,4 @@ def test_JPN_90279():
         cameras=test_cases.get("cameras", ["v"]),
         n_knots=test_cases.get("n_knots", 6),
     )
-    assert o is not None
+    return o

@@ -7,6 +7,7 @@ from typing import Callable
 from typing import Collection
 from typing import Iterable
 
+import pytest
 from xarray import DataArray
 
 DataSelector = Callable[
@@ -14,6 +15,7 @@ DataSelector = Callable[
 ]
 
 
+@pytest.mark.skip("Not a test to run, used by physics tests")
 def test_case_selector(
     data: DataArray,
     channel_dim: str,
