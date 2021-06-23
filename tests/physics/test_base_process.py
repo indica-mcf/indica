@@ -96,16 +96,13 @@ class JetTestAnalysis(BaseTestAnalysis):
         -------
         """
         diagnostics = {
-            "efit": self.reader.get(uid="jetppf", instrument="efit", revision=0),
+            "eftp": self.reader.get(uid="jetppf", instrument="eftp", revision=0),
             "hrts": self.reader.get(uid="jetppf", instrument="hrts", revision=0),
             "sxr": self.reader.get(uid="jetppf", instrument="sxr", revision=0),
             # "bolo": self.reader.get(uid="jetppf", instrument="bolo", revision=0),
             # "cxrs": self.reader.get(uid="jetppf", instrument="cxrs", revision=0),
         }
-        efit_equilibrium = Equilibrium(
-            equilibrium_data=diagnostics["efit"],
-            # T_e=diagnostics.get("hrts", {}).get("te", None),
-        )
+        efit_equilibrium = Equilibrium(equilibrium_data=diagnostics["eftp"])
         for key, diag in diagnostics.items():
             for data in diag.values():
                 if hasattr(data.attrs["transform"], "equilibrium"):
