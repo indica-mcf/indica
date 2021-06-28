@@ -17,7 +17,7 @@ from indica import readers
 from indica.equilibrium import Equilibrium
 from indica.operators import InvertRadiation
 from indica.utilities import coord_array
-from .test_channel_selection import test_case_selector
+from .channel_selection import channel_selector
 
 
 class BaseTestAnalysis:
@@ -71,7 +71,7 @@ class JetTestAnalysis(BaseTestAnalysis):
             pulse=self.pulse,
             tstart=self.time[0],
             tend=self.time[1],
-            selector=test_case_selector,
+            selector=channel_selector,
         )
         self.authenticate_reader()
         print("Reading diagnostics")
