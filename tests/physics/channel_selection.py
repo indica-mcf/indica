@@ -13,6 +13,8 @@ DataSelector = Callable[
     [DataArray, str, Collection[Number], Iterable[Number]], Iterable[Number]
 ]
 
+INSTRUMENT_TYPES = {"hrts": "thomson", "sxr": "radiation"}
+
 
 def channel_selector(
     data: DataArray,
