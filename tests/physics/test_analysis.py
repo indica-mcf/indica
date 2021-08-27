@@ -52,8 +52,11 @@ class BaseTestAnalysis:
         )
         time = self.test_cases[str(config_key)].get("t", (45, 50, 5))
         self.t: DataArray = coord_array(np.linspace(*time), "t")
-        self.trange: Tuple[float, float] = time[0], time[1]
+        self.trange: Tuple[float, float] = (time[0], time[1])
         self.cache_dir = Path(__file__).absolute().parent / "test_cache"
+        self.comparison_data = self.test_cases[str(config_key)].get(
+            "comparison_data", {}
+        )
 
     def clean_cache(self):
         """
@@ -91,12 +94,17 @@ class JetTestAnalysis(BaseTestAnalysis):
         self.cameras: List[str] = self.test_cases[str(pulse)].get("cameras", ["v"])
         self.n_knots: int = self.test_cases[str(pulse)].get("n_knots", 6)
         readers.abstractreader.CACHE_DIR = str(self.cache_dir)
-        self.reader = readers.PPFReader(
-            pulse=self.pulse,
-            tstart=self.trange[0],
-            tend=self.trange[1],
-            selector=channel_selector,
-        )
+        try:
+            self.reader = readers.PPFReader(
+                pulse=self.pulse,
+                tstart=self.trange[0],
+                tend=self.trange[1],
+                selector=channel_selector,
+            )
+        except ConnectionError as e:
+            pytest.skip("Unable to connect to PPF server")
+            self.clean_cache()
+            raise ConnectionError(e)
         self.authenticate_reader()
         print("Reading diagnostics")
         self.diagnostics, self.equilibrium = self.get_diagnostics()
@@ -138,6 +146,7 @@ class JetTestAnalysis(BaseTestAnalysis):
 
     def authenticate_reader(self) -> None:
         if self.reader.requires_authentication:
+            pytest.skip("Manual authentication required")
             user = input("JET username: ")
             password = getpass.getpass("JET password: ")
             assert self.reader.authenticate(user, password)
@@ -150,7 +159,7 @@ class JetTestAnalysis(BaseTestAnalysis):
         -------
         """
         diagnostics = {
-            "eftp": self.reader.get(uid="jetppf", instrument="eftp", revision=0),
+            "efit": self.reader.get(uid="jetppf", instrument="efit", revision=0),
             "hrts": self.reader.get(uid="jetppf", instrument="hrts", revision=0),
             "sxr": self.reader.get(uid="jetppf", instrument="sxr", revision=0),
             # "bolo": self.reader.get(uid="jetppf", instrument="bolo", revision=0),
@@ -159,7 +168,7 @@ class JetTestAnalysis(BaseTestAnalysis):
         ignore_channels = self.test_cases[str(self.pulse)].get("ignore_channels", {})
         for instrument, channels in ignore_channels.items():
             self.ignore_channels(name=instrument, channels=channels)
-        efit_equilibrium = Equilibrium(equilibrium_data=diagnostics["eftp"])
+        efit_equilibrium = Equilibrium(equilibrium_data=diagnostics["efit"])
         for key, diag in diagnostics.items():
             for data in diag.values():
                 if hasattr(data.attrs["transform"], "equilibrium"):
@@ -179,6 +188,19 @@ class JetTestAnalysis(BaseTestAnalysis):
         fig: plt.Figure = None,
         ax: plt.Axes = None,
     ):
+        ppf_data, _ = None, None
+        if self.comparison_data.get("invert_sxr") is not None:
+            ppf_data, _ = self.reader._get_signal(
+                uid=self.comparison_data["invert_sxr"]["uid"],
+                instrument=self.comparison_data["invert_sxr"]["instrument"],
+                quantity=self.comparison_data["invert_sxr"]["quantity"],
+                revision=self.comparison_data["invert_sxr"]["revision"],
+            )
+            ppf_data = DataArray(
+                data=ppf_data.data,
+                coords=[ppf_data.dimensions[0].data, ppf_data.dimensions[1].data],
+                dims=["t", "x"],
+            )
         try:
             times = times or self.t
             if isinstance(times, (int, float)):
@@ -203,6 +225,10 @@ class JetTestAnalysis(BaseTestAnalysis):
                     cresult["back_integral"].sel(t=time).plot(
                         x="sxr_v_rho_poloidal", label="From model", ax=ax[panel]
                     )
+                    if ppf_data is not None:
+                        ppf_data.sel(t=time, method="nearest").plot(
+                            label="From ppf", ax=ax[panel]
+                        )
                     ax[panel].legend()
                     panel += 1
         finally:
@@ -219,29 +245,25 @@ class BaseTestClass:
         o.clean_cache()
         return o
 
-    @pytest.mark.skip("Not implemented yet")
+    @pytest.mark.skip("No EFTP/HRTS for this pulse, investigating")
     def test_JPN_96175(self):
-        pulse = 90279
+        pulse = 96175
         return self.analysis(pulse=pulse)
 
-    @pytest.mark.skip("Not implemented yet")
     def test_JPN_96375(self):
-        pulse = 90279
+        pulse = 96375
         return self.analysis(pulse=pulse)
 
-    @pytest.mark.skip("Not implemented yet")
     def test_JPN_94442(self):
-        pulse = 90279
+        pulse = 94442
         return self.analysis(pulse=pulse)
 
-    @pytest.mark.skip("Currently unable to run as CI test, requires JET PPF server")
     def test_JPN_90279(self):
         pulse = 90279
         return self.analysis(pulse=pulse)
 
-    @pytest.mark.skip("Not implemented yet")
     def test_JPN_97006(self):
-        pulse = 90279
+        pulse = 97006
         return self.analysis(pulse=pulse)
 
 
