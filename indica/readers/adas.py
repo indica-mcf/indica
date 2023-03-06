@@ -371,6 +371,88 @@ class ADASReader(BaseIO):
 
         return pecs
 
+    def get_adf21(
+        self,
+        source_element: str,
+        target_element: str,
+        source_charge: str,
+        filetype: str = "bmp",
+        year: str = "",
+    ):
+        """Read data from the specified ADF22 ADAS file.
+
+        Parameters
+        ----------
+        element
+            The atomic symbol for the element which will be retrieved.
+        charge
+            Charge state of the ion (e.g. 16 for Ar 16+), can also include
+            other string for more complicated path (transport_llu][ar15ic.dat
+            setting charge to "15ic")
+        filetype
+            The type of data to retrieve. Options: ic, cl, ca, ls, llu, ...
+        year
+            The two-digit year label for the data. = "transport" if special
+            transport path
+
+
+        Returns
+        -------
+        :
+            The data in the specified file. Dimensions are density and
+            temperature. Each members of the dataset correspond to a
+            different charge state.
+
+        """
+        datetime.datetime.now()
+        file_component = f"{filetype}{year}][{target_element}"
+        filename = Path(pathname2url(file_component)) / pathname2url(
+            f"{file_component}_{source_element}{source_charge}.dat"
+        )
+        with self._get_file("adf21", filename):
+            pass
+
+    def get_adf22(
+        self,
+        source_element: str,
+        target_element: str,
+        source_charge: str,
+        filetype: str = "bmp",
+        year: str = "",
+    ):
+        """Read data from the specified ADF22 ADAS file.
+
+        Parameters
+        ----------
+        element
+            The atomic symbol for the element which will be retrieved.
+        charge
+            Charge state of the ion (e.g. 16 for Ar 16+), can also include
+            other string for more complicated path (transport_llu][ar15ic.dat
+            setting charge to "15ic")
+        filetype
+            The type of data to retrieve. Options: ic, cl, ca, ls, llu, ...
+        year
+            The two-digit year label for the data. = "transport" if special
+            transport path
+
+
+        Returns
+        -------
+        :
+            The data in the specified file. Dimensions are density and
+            temperature. Each members of the dataset correspond to a
+            different charge state.
+
+        """
+        datetime.datetime.now()
+        file_component = f"{filetype}{year}][{target_element}"
+        filename = Path(pathname2url(file_component)) / pathname2url(
+            f"{file_component}_{source_element}{source_charge}.dat"
+        )
+        with self._get_file("adf22", filename):
+            pass
+
     def create_provenance(
         self, filename: Path, start_time: datetime.datetime
     ) -> prov.ProvEntity:
