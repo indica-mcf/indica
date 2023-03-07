@@ -375,25 +375,28 @@ class ADASReader(BaseIO):
         self,
         source_element: str,
         target_element: str,
-        source_charge: str,
-        filetype: str = "bmp",
+        charge: str,
+        filetype: str = "bms",
         year: str = "",
     ):
         """Read data from the specified ADF22 ADAS file.
 
         Parameters
         ----------
-        element
-            The atomic symbol for the element which will be retrieved.
+        source_element
+            The atomic symbol for the neutral element that the beam is
+            composed of.
+        target_element
+            The atomic symbol for the target element the neutral beam
+            is interacting with.
         charge
-            Charge state of the ion (e.g. 16 for Ar 16+), can also include
-            other string for more complicated path (transport_llu][ar15ic.dat
-            setting charge to "15ic")
+            Charge state achieved by source element after interaction
+            with target element.
         filetype
-            The type of data to retrieve. Options: ic, cl, ca, ls, llu, ...
+            The type of data to retrieve e.g. bms. See OPEN-ADAS
+            website for details.
         year
-            The two-digit year label for the data. = "transport" if special
-            transport path
+            The two-digit year label for the data.
 
 
         Returns
@@ -405,9 +408,9 @@ class ADASReader(BaseIO):
 
         """
         datetime.datetime.now()
-        file_component = f"{filetype}{year}][{target_element}"
-        filename = Path(pathname2url(file_component)) / pathname2url(
-            f"{file_component}_{source_element}{source_charge}.dat"
+        file_component = pathname2url(f"{filetype}{year}][{target_element}")
+        filename = Path(file_component) / pathname2url(
+            f"{file_component}_{source_element}{charge}.dat"
         )
         with self._get_file("adf21", filename):
             pass
@@ -416,7 +419,7 @@ class ADASReader(BaseIO):
         self,
         source_element: str,
         target_element: str,
-        source_charge: str,
+        charge: str,
         filetype: str = "bmp",
         year: str = "",
     ):
@@ -424,17 +427,20 @@ class ADASReader(BaseIO):
 
         Parameters
         ----------
-        element
-            The atomic symbol for the element which will be retrieved.
+        source_element
+            The atomic symbol for the neutral element that the beam is
+            composed of.
+        target_element
+            The atomic symbol for the target element the neutral beam
+            is interacting with.
         charge
-            Charge state of the ion (e.g. 16 for Ar 16+), can also include
-            other string for more complicated path (transport_llu][ar15ic.dat
-            setting charge to "15ic")
+            Charge state achieved by source element after interaction
+            with target element.
         filetype
-            The type of data to retrieve. Options: ic, cl, ca, ls, llu, ...
+            The type of data to retrieve e.g. bms. See OPEN-ADAS
+            website for details.
         year
-            The two-digit year label for the data. = "transport" if special
-            transport path
+            The two-digit year label for the data.
 
 
         Returns
@@ -448,7 +454,7 @@ class ADASReader(BaseIO):
         datetime.datetime.now()
         file_component = f"{filetype}{year}][{target_element}"
         filename = Path(pathname2url(file_component)) / pathname2url(
-            f"{file_component}_{source_element}{source_charge}.dat"
+            f"{file_component}_{source_element}{charge}.dat"
         )
         with self._get_file("adf22", filename):
             pass
